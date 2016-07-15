@@ -11,6 +11,58 @@
 	
 	<modules>
 		<module>external-command-intepreter</module>
+		<module>columns-to-rows</module>
 	</modules>
+	
+	<properties>
+		<datacleaner.version>5.0.4-SNAPSHOT</datacleaner.version>
+	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- DataCleaner -->
+		<dependency>
+			<groupId>org.eobjects.datacleaner</groupId>
+			<artifactId>DataCleaner-api</artifactId>
+			<version>${datacleaner.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.datacleaner</groupId>
+			<artifactId>DataCleaner-engine-core</artifactId>
+			<version>${datacleaner.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eobjects.datacleaner</groupId>
+			<artifactId>DataCleaner-testware</artifactId>
+			<version>${datacleaner.version}</version>
+		</dependency>
+
+		<!-- Utils -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
