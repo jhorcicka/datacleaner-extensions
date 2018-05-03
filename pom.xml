@@ -15,7 +15,7 @@
 	</modules>
 	
 	<properties>
-		<datacleaner.version>5.0.4-SNAPSHOT</datacleaner.version>
+		<datacleaner.version>5.1.0</datacleaner.version>
 	</properties>
 
 	<build>
