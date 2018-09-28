@@ -1,14 +1,14 @@
-package org.datacleaner.beans.command;
+package com.hi.datacleaner;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.datacleaner.api.InputColumn;
 import org.datacleaner.data.MockInputColumn;
 import org.datacleaner.data.MockInputRow;
-import org.elasticsearch.common.lang3.StringUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

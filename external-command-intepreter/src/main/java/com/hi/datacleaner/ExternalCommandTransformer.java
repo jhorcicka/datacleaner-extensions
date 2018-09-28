@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.datacleaner.beans.command;
+package com.hi.datacleaner;
 
 import java.io.BufferedReader;
 import java.io.IOException;
