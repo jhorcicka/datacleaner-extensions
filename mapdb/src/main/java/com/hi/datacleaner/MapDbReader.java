@@ -117,8 +117,7 @@ public class MapDbReader implements Transformer {
 
     private DB get(final String path) {
         return DBMaker.newFileDB(new File(path))
-//                .cacheSoftRefEnable()
-                //.closeOnJvmShutdown()
+                .cacheSoftRefEnable()
                 .make();
     }
 
@@ -126,7 +125,7 @@ public class MapDbReader implements Transformer {
         final DB db = get(path);
         for (final String name : db.getAll().keySet()) {
             for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
-                System.err.println("MYTODO: " + entry.getKey() + " => " + entry.getValue().toString());
+                System.err.println(name + ": " + entry.getKey() + " => " + entry.getValue());
             }
         }
         db.close();
@@ -134,10 +133,7 @@ public class MapDbReader implements Transformer {
 
     public static void main(String[] args) {
         final MapDbReader reader = new MapDbReader();
-        //final String path = "/home/jakub/desktop/di/mti/test.mapdb";
-
-        final String path = "/home/jakub/desktop/di/mti/file.mapdb";
         //reader.createFile(path);
-        reader.readFile(path);
+        //reader.readFile(path);
     }
 }
