@@ -1,7 +1,7 @@
 package com.hi.datacleaner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -18,10 +18,12 @@ import org.datacleaner.api.Provided;
 import org.datacleaner.api.Transformer;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.mapdb.HTreeMap;
 
 @Named("MapDB Reader")
 @Description("Reads the content of a given MapDB file.")
 public class MapDbReader implements Transformer {
+    private static String OUTPUT_COLUMN_RECORD = "record";
     private static String OUTPUT_COLUMN_KEY = "key";
     private static String OUTPUT_COLUMN_VALUE = "value";
 
@@ -35,49 +37,38 @@ public class MapDbReader implements Transformer {
     @Configured
     String filePath;
 
-    private static <K, V> String getContent(final String name, final Map<K, V> map) {
-        final StringBuilder content = new StringBuilder();
-        content.append(name).append(":{");
-
+    private <K, V> void outputContent(final String name, final Map<K, V> map) {
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             final K key = entry.getKey();
             final V value = entry.getValue();
-            content.append(key).append(":").append(value).append(",");
+            rowCollector.putValues(name, key, value);
         }
+    }
 
-        content.append("}");
-        final String output = content.toString();
-
-        if (output.endsWith(",}")) {
-            return output.substring(output.length() - 2) + "}";
-        } else {
-            return output;
+    private <E> void outputContent(final String name, final Collection<E> collection) {
+        for (final E value : collection) {
+            rowCollector.putValues(name, "", value);
         }
     }
 
     @Override
     public OutputColumns getOutputColumns() {
-        return new OutputColumns(String.class, OUTPUT_COLUMN_KEY, OUTPUT_COLUMN_VALUE);
+        return new OutputColumns(String.class, OUTPUT_COLUMN_RECORD, OUTPUT_COLUMN_KEY, OUTPUT_COLUMN_VALUE);
     }
 
     @Override
     public Object[] transform(final InputRow inputRow) {
-        /*
         try {
-            final DB db = DBMaker.fileDB(filePath).make(); // v 3.*
-
-            for (String name : db.getAllNames()) {
-                System.err.println("MYTODO: name=" + name);
-            }
+            final DB db = DBMaker.newFileDB(new File(filePath)).make();
 
             for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
                 final String name = entry.getKey();
                 final Object value = entry.getValue();
-                System.err.println("MYTODO: " + name + ": " + value);
 
                 if (value instanceof Map) {
-                    final String outputValue = getContent(name, (Map<?, ?>) value);
-                    rowCollector.putValues(name, outputValue);
+                    outputContent(name, (Map<?, ?>) value);
+                } else if (value instanceof Collection) {
+                    outputContent(name, (Collection) value);
                 } else {
                     System.err.println(String.format("Unexpected type (%s) for '%s'.", value.getClass(), name));
                 }
@@ -87,35 +78,34 @@ public class MapDbReader implements Transformer {
         } catch (final Exception e) {
             e.printStackTrace();
         }
-        */
 
         return new Object[]{};
     }
 
     private void createFile(final String path) {
-        /*
         final DB db = get(path);
-        final HTreeMap map = db.hashMap("record").createOrOpen();
+        final HTreeMap map = db.createHashMap("record").make();
         map.put("test-key", "test-value");
+        db.commit();
         db.close();
-        */
     }
-    
+
     private DB get(final String path) {
-        //return DBMaker.newFileDB(new File(path)).make();
-        return DBMaker.fileDB(path).make();
+        return DBMaker.newFileDB(new File(path))
+//                .cacheSoftRefEnable()
+                //.closeOnJvmShutdown()
+                .make();
     }
 
     private void readFile(final String path) {
         final DB db = get(path);
         for (final String name : db.getAll().keySet()) {
-        //for (final String name : db.getAllNames()) {
             for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
                 System.err.println("MYTODO: " + entry.getKey() + " => " + entry.getValue().toString());
                 if (entry.getValue() instanceof Map) {
                     final Map map = (Map) entry.getValue();
                     for (final Object key : map.entrySet()) {
-                        System.err.println(key); 
+                        System.err.println(key);
                     }
                 }
             }
@@ -123,14 +113,15 @@ public class MapDbReader implements Transformer {
         db.close();
     }
 
-
     public static void main(String[] args) {
         final MapDbReader reader = new MapDbReader();
-        final String path = "/home/jakub/test.mapdb";
-        //final String path = "/home/jakub/file.mapdb";
-        //reader.createFile(path);
-        reader.readFile(path);
-        //reader.filePath = path;
-        //reader.transform(null);
+        //final String path = "/home/jakub/desktop/di/mti/test.mapdb";
+
+        final String path = "/home/jakub/desktop/di/mti/file.mapdb";
+//        reader.createFile(path);
+//        reader.readFile(path);
+
+        reader.filePath = path;
+        reader.transform(null);
     }
 }
