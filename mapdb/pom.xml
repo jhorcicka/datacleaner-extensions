@@ -10,6 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mapdb</artifactId>
+    
+    <properties>
+        <!--<mapdb.version>0.9.6</mapdb.version> &lt;!&ndash; java.io.IOException: storage has invalid header &ndash;&gt;-->
+        <!--<mapdb.version>1.0.9</mapdb.version> &lt;!&ndash; java.io.IOError: java.io.EOFException &ndash;&gt;-->
+        <!--<mapdb.version>2.0-beta13</mapdb.version> &lt;!&ndash; org.mapdb.DBException$WrongConfig: This is not MapDB file &ndash;&gt;-->
+        <mapdb.version>3.0.7</mapdb.version> <!-- org.mapdb.DBException$WrongFormat: Wrong file header, not MapDB file -->
+    </properties>
 
     <build>
         <plugins>
@@ -44,12 +51,7 @@
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
-            <version>3.0.7</version>
+            <version>${mapdb.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.mapdb</groupId>-->
-            <!--<artifactId>mapdb</artifactId>-->
-            <!--<version>1.0.9</version>-->
-        <!--</dependency>-->
     </dependencies>
 </project>

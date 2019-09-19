@@ -62,16 +62,10 @@ public class MapDbReader implements Transformer {
 
     @Override
     public Object[] transform(final InputRow inputRow) {
+        /*
         try {
             final DB db = DBMaker.fileDB(filePath).make(); // v 3.*
-            //final DB db = DBMaker.newFileDB(new File(filePath)).closeOnJvmShutdown().make(); // v 1.*
-            /*
-            db.atomicString("my-key", "my-value");
-            db.commit();
-            if (1 == 1) {
-                return null;
-            }
-            */
+
             for (String name : db.getAllNames()) {
                 System.err.println("MYTODO: name=" + name);
             }
@@ -88,20 +82,55 @@ public class MapDbReader implements Transformer {
                     System.err.println(String.format("Unexpected type (%s) for '%s'.", value.getClass(), name));
                 }
             }
-            
+
             db.close();
         } catch (final Exception e) {
             e.printStackTrace();
         }
+        */
 
         return new Object[]{};
     }
+
+    private void createFile(final String path) {
+        /*
+        final DB db = get(path);
+        final HTreeMap map = db.hashMap("record").createOrOpen();
+        map.put("test-key", "test-value");
+        db.close();
+        */
+    }
     
+    private DB get(final String path) {
+        //return DBMaker.newFileDB(new File(path)).make();
+        return DBMaker.fileDB(path).make();
+    }
+
+    private void readFile(final String path) {
+        final DB db = get(path);
+        for (final String name : db.getAll().keySet()) {
+        //for (final String name : db.getAllNames()) {
+            for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
+                System.err.println("MYTODO: " + entry.getKey() + " => " + entry.getValue().toString());
+                if (entry.getValue() instanceof Map) {
+                    final Map map = (Map) entry.getValue();
+                    for (final Object key : map.entrySet()) {
+                        System.err.println(key); 
+                    }
+                }
+            }
+        }
+        db.close();
+    }
+
+
     public static void main(String[] args) {
         final MapDbReader reader = new MapDbReader();
-        //reader.filePath = "/home/jakub/my.mapdb";
-        //reader.filePath = "/home/jakub/does-not-exist";
-        reader.filePath = "/home/jakub/groupdelta-rough.mapdb";
-        reader.transform(null);
+        final String path = "/home/jakub/test.mapdb";
+        //final String path = "/home/jakub/file.mapdb";
+        //reader.createFile(path);
+        reader.readFile(path);
+        //reader.filePath = path;
+        //reader.transform(null);
     }
 }
