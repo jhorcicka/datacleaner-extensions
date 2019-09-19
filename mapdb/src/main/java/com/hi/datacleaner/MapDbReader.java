@@ -34,20 +34,25 @@ public class MapDbReader implements Transformer {
     @Configured
     InputColumn<String> inputColumn;
 
-    @Configured
+    @Configured(required = false)
     String filePath;
 
     private <K, V> void outputContent(final String name, final Map<K, V> map) {
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             final K key = entry.getKey();
             final V value = entry.getValue();
-            rowCollector.putValues(name, key, value);
+            
+            if (name != null && key != null && value != null) {
+                rowCollector.putValues(name, key, value);
+            }
         }
     }
 
     private <E> void outputContent(final String name, final Collection<E> collection) {
         for (final E value : collection) {
-            rowCollector.putValues(name, "", value);
+            if (name != null && value != null) {
+                rowCollector.putValues(name, "", value);
+            }
         }
     }
 
@@ -55,11 +60,29 @@ public class MapDbReader implements Transformer {
     public OutputColumns getOutputColumns() {
         return new OutputColumns(String.class, OUTPUT_COLUMN_RECORD, OUTPUT_COLUMN_KEY, OUTPUT_COLUMN_VALUE);
     }
+    
+    private File getFile(final InputRow row) {
+        File file = null; 
+        
+        if (inputColumn != null) {
+            final String path = row.getValue(inputColumn);
+            
+            if (path != null && path.length() > 0) {
+                file = new File(path);
+            }
+        }
+        
+        if (file == null && filePath != null && filePath.length() > 0) {
+            file = new File(filePath);
+        }
+        
+        return file;
+    }
 
     @Override
     public Object[] transform(final InputRow inputRow) {
         try {
-            final DB db = DBMaker.newFileDB(new File(filePath)).make();
+            final DB db = DBMaker.newFileDB(getFile(inputRow)).make();
 
             for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
                 final String name = entry.getKey();
@@ -68,7 +91,7 @@ public class MapDbReader implements Transformer {
                 if (value instanceof Map) {
                     outputContent(name, (Map<?, ?>) value);
                 } else if (value instanceof Collection) {
-                    outputContent(name, (Collection) value);
+                    outputContent(name, (Collection<?>) value);
                 } else {
                     System.err.println(String.format("Unexpected type (%s) for '%s'.", value.getClass(), name));
                 }
@@ -85,7 +108,9 @@ public class MapDbReader implements Transformer {
     private void createFile(final String path) {
         final DB db = get(path);
         final HTreeMap map = db.createHashMap("record").make();
-        map.put("test-key", "test-value");
+        map.put("test-key-1", "test-value-1");
+        map.put("test-key-2", "test-value-2");
+        map.put("test-key-3", "test-value-3");
         db.commit();
         db.close();
     }
@@ -102,12 +127,6 @@ public class MapDbReader implements Transformer {
         for (final String name : db.getAll().keySet()) {
             for (final Map.Entry<String, Object> entry : db.getAll().entrySet()) {
                 System.err.println("MYTODO: " + entry.getKey() + " => " + entry.getValue().toString());
-                if (entry.getValue() instanceof Map) {
-                    final Map map = (Map) entry.getValue();
-                    for (final Object key : map.entrySet()) {
-                        System.err.println(key);
-                    }
-                }
             }
         }
         db.close();
@@ -118,10 +137,7 @@ public class MapDbReader implements Transformer {
         //final String path = "/home/jakub/desktop/di/mti/test.mapdb";
 
         final String path = "/home/jakub/desktop/di/mti/file.mapdb";
-//        reader.createFile(path);
-//        reader.readFile(path);
-
-        reader.filePath = path;
-        reader.transform(null);
+        //reader.createFile(path);
+        reader.readFile(path);
     }
 }
