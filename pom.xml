@@ -14,7 +14,8 @@
         <module>columns-to-rows</module>
         <module>htmlselector</module>
         <module>mapdb</module>
-    </modules>
+		<module>random-data-generator</module>
+	</modules>
 
     <properties>
         <datacleaner.version>6.5.0-RC5</datacleaner.version>
